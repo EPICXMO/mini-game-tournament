@@ -1,0 +1,24 @@
+﻿AI Development Rules (rules.md)
+These rules guide the AI assistant during the development of the "AI Multiplayer Mini-Game Hub" project. Adherence to these rules is crucial for maintaining code quality, consistency, and alignment with the project requirements.
+Core Principles
+1. Follow the Plan: Strictly adhere to the requirements defined in the PRD (comprehensive_prd_v1) and the tasks outlined in the TODO.md (project_todo_list_v1). Do not add features or make design decisions not specified in these documents without explicit instruction.
+2. Incremental Development: Implement features incrementally based on the TODO.md tasks. Focus on completing one task fully before moving to the next.
+3. Modularity & Extensibility: Implement all systems, especially mini-game components (hazards, power-ups, characters, environments), using modular design principles (base classes/interfaces, prefabs, configuration files) as specified in the PRD (Pass 3 details) to ensure future customization and extension is easy.
+4. Modification Preference: When updating or fixing features, prioritize modifying existing code where appropriate rather than rewriting large sections, unless refactoring is explicitly requested or necessary for architectural integrity.
+Code Quality & Standards
+5. Clarity & Comments: Generate clear, readable, and well-commented code. Explain the purpose of complex logic, algorithms, and non-obvious sections. Use standard documentation formats (e.g., XML docs for C#, JSDoc for Node.js).
+6. Best Practices: Adhere to standard coding conventions and best practices for the languages and frameworks being used (C# & Unity for frontend, JavaScript/Node.js for backend).
+7. Function/Method Size: Keep functions and methods relatively small and focused on a single responsibility. Avoid overly long or complex functions.
+8. No Placeholders: Fully implement the requested feature or task. Do not leave placeholder comments like // TODO: Implement later or // ... unless specifically instructed to create a stub. If unable to complete a task, state the reason clearly.
+Asset & Configuration Management
+9. Use Configuration Files: Reference assets (models, sprites, prefabs, sounds, etc.) via configuration files (ScriptableObjects, JSON) as defined in the PRD (Pass 3 / Asset Management). Do not hardcode asset paths directly in scripts.
+10. Folder Structure: Place generated code and assets into the appropriate folders as defined in the project structure (TODO.md, Phase 0) and Asset Management sections of the PRD.
+Testing & Version Control
+11. Testing: After implementing a feature or fixing a bug, run any relevant tests (if available/defined later). Ensure features work as described in the PRD.
+12. Version Control: Commit changes to Git frequently after completing a task and ensuring it works (and tests pass, if applicable). Use clear, descriptive commit messages related to the completed task from TODO.md.
+Security & Error Handling
+13. Backend Security: Follow standard Node.js security practices, including input validation on data received from clients, avoiding exposure of sensitive information, and using secure methods for authentication/authorization (when implemented).
+14. Error Handling: Implement robust error handling using try-catch blocks, null checks, and appropriate logging, especially for network communication and file operations.
+Communication
+15. Ask for Clarification: If requirements in the PRD or TODO.md are unclear or ambiguous, ask for clarification before proceeding.
+16. Report Issues: If significant technical challenges arise or a requirement seems infeasible with the chosen approach, report the issue clearly.
