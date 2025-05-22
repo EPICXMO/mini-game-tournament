@@ -121,3 +121,4 @@ Phase 6: Documentation & Deployment
 * [ ] Deployment:
    * [ ] Create final builds.
    * [ ] (Optional: Outline deployment steps to specific platforms/stores).
+   * [ ] Document release notes.
