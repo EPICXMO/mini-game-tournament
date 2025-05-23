@@ -25,9 +25,9 @@ Phase 1: Core Systems & Hub Implementation
    * [ ] Create Lobby scene.
    * [ ] Create basic scene transition logic.
 * [ ] Node.js Backend Basics:
-   * [ ] Implement basic Node.js server.
-   * [ ] Set up WebSocket (Socket.io) connection handling.
-   * [ ] Implement basic client connection/disconnection logic.
+   * [x] Implement basic Node.js server.
+   * [x] Set up WebSocket (Socket.io) connection handling.
+   * [x] Implement basic client connection/disconnection logic.
 * [ ] Main Menu/Hub UI:
    * [ ] Implement basic UI layout (Title, Buttons: Play Tournament, Select Mini-Game, Options, Quit).
    * [ ] Implement button functionality (scene transitions).
