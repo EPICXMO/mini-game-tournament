@@ -6,26 +6,62 @@
 **Development Style**: "Vibe-coding" with AI assistance, rapid iterations
 **Repository**: https://github.com/<my-user>/party-royale
 
-## Phase 1: Foundation & Core Systems (Weeks 1-2)
+## Phase 0: Project Setup & Foundation
 
-### Milestone 1.1: Project Setup & Unity Foundation
-- [ ] **Unity Project Setup**
-  - [ ] Create Unity project with 2D/3D hybrid setup
-  - [ ] Configure build targets (PC, Android, iOS)
-  - [ ] Set up Input System for cross-platform controls
-  - [ ] Create basic folder structure (Scripts, Prefabs, Scenes, MiniGames/)
+### Environment Setup
+- [ ] Install required Unity version
+- [ ] Install Node.js and required packages (e.g., WebSocket library like Socket.io)
+- [ ] Set up IDE (Cursor/Roo/Cline) with Unity and Node.js integration
+- [ ] Configure Blender AI/MCP integration (if available/needed for asset pipeline)
 
-- [ ] **Backend Foundation** 
-  - [ ] Complete Node.js + Socket.io server setup
-  - [ ] Implement basic connection handling
-  - [ ] Set up player session management
-  - [ ] Create basic API endpoints for lobby management
+### Version Control
+- [ ] Initialize Git repository
+- [ ] Create initial commit
+- [ ] Set up remote repository (e.g., GitHub)
 
-- [ ] **Core Systems Architecture**
-  - [ ] Design modular mini-game framework
-  - [ ] Create base classes for game managers
-  - [ ] Implement scene transition system
-  - [ ] Set up persistent data management
+### Project Structure
+- [ ] Create initial Unity project folder structure (e.g., Scripts, Prefabs, Assets/Models, Assets/Sprites, Scenes, MiniGames/[GameName])
+- [ ] Create initial Node.js backend project structure
+
+### Core Dependencies
+- [ ] Install/Import necessary Unity packages (e.g., Input System, any required asset store tools)
+- [ ] Install necessary Node.js packages (npm install)
+
+### AI Guidelines
+- [ ] Define & Create rules.md file (AI Development Guidelines based on PRD Section 12)
+- [ ] Review & Finalize rules.md content
+
+## Phase 1: Core Systems & Hub Implementation (Weeks 1-2)
+
+### Basic Unity Scene Setup
+- [ ] Create Main Menu scene
+- [ ] Create Lobby scene
+- [ ] Create basic scene transition logic
+
+### Node.js Backend Basics
+- [ ] Implement basic Node.js server
+- [ ] Set up WebSocket (Socket.io) connection handling
+- [ ] Implement basic client connection/disconnection logic
+
+### Main Menu/Hub UI
+- [ ] Implement basic UI layout (Title, Buttons: Play Tournament, Select Mini-Game, Options, Quit)
+- [ ] Implement button functionality (scene transitions)
+- [ ] Designate area/trigger for Easter Egg activations
+
+### Lobby System
+- [ ] Implement basic Lobby scene UI (Player list, Game settings placeholder, Ready button, Start Game button)
+- [ ] Implement basic lobby creation/joining logic on backend
+- [ ] Implement player list synchronization between clients and server
+- [ ] Implement Ready state logic
+
+### Basic Multiplayer Framework
+- [ ] Establish basic communication between Unity client and Node.js server
+- [ ] Implement simple test message sending/receiving
+- [ ] Implement placeholder for player data synchronization
+
+### Core Systems (Placeholders)
+- [ ] Implement basic persistent currency tracking (placeholder, e.g., PlayerPrefs or simple file)
+- [ ] Implement basic global settings structure (e.g., for Ghost Mode toggle)
 
 ### Milestone 1.2: Lobby & Multiplayer Foundation
 - [ ] **Main Menu & Lobby UI**
@@ -40,39 +76,35 @@
   - [ ] Create tournament flow management
   - [ ] Add bot player system for auto-filling matches
 
-## Phase 2: First Mini-Game - Jetpack Joyride Clone (Weeks 3-4)
+## Phase 2: Mini-Game Implementation (Iterative) (Weeks 3-4)
 
-### Milestone 2.1: Core Gameplay Implementation
-- [ ] **Player Character & Controls**
-  - [ ] Implement auto-forward movement
-  - [ ] Add jetpack thrust mechanics (hold/tap to ascend)
-  - [ ] Create smooth fall physics
-  - [ ] Add cross-platform input mapping (keyboard/touch)
+### Mini-Game: Jetpack Joyride Clone
 
-- [ ] **Level Generation & Hazards**
-  - [ ] Create procedural obstacle spawning (zappers, missiles, lasers)
-  - [ ] Implement collision detection system
-  - [ ] Add safe floor mechanics (landing doesn't kill)
-  - [ ] Create coin/collectible spawning system
+#### Scene/Module Setup
+- [ ] Create scene and basic script structure for the mini-game
 
-- [ ] **Scoring & Game State**
-  - [ ] Implement distance-based scoring
-  - [ ] Add coin collection scoring
-  - [ ] Create game over conditions
-  - [ ] Add power-up system (if applicable)
+#### Core Gameplay
+- [ ] Implement player character movement/controls (using placeholder visuals)
+- [ ] Implement core game mechanic (scrolling, jetpack thrust)
+- [ ] Implement procedural generation for level/obstacles (using placeholder visuals)
+- [ ] Implement hazard collision and game over logic (single player)
+- [ ] Implement coin/collectible spawning and collection logic
+- [ ] Implement power-up logic (if applicable for this game)
+- [ ] Implement scoring system (distance/time + coins)
 
-### Milestone 2.2: Multiplayer Integration
-- [ ] **Ghost Player System**
-  - [ ] Display other players as translucent avatars
-  - [ ] Synchronize positions in real-time
-  - [ ] Show player names above characters
-  - [ ] Implement smooth interpolation for movement
+#### Asset Integration (Placeholders)
+- [ ] Integrate basic player character visual (placeholder model/sprite)
+- [ ] Integrate basic hazard visuals (placeholder models/sprites)
+- [ ] Integrate basic environment visuals
 
-- [ ] **Tournament Integration**
-  - [ ] Connect to tournament scoring system
-  - [ ] Add round start/end synchronization
-  - [ ] Implement results screen integration
-  - [ ] Create spectate mode for eliminated players
+#### Multiplayer Integration
+- [ ] Implement player representation (syncing position/state of remote players per Section 8)
+- [ ] Implement environment synchronization (hazards, etc., per Section 8)
+- [ ] Implement game state management (start, elimination, round end, spectate, results screen per game spec / Section 8)
+- [ ] Implement network considerations (update frequency, interpolation per Section 8)
+
+#### Basic Testing
+- [ ] Test core mechanics and multiplayer sync in isolation
 
 ## Phase 3: Tournament System & Leaderboard (Weeks 5-6)
 
@@ -139,55 +171,105 @@
   - [ ] Create chain reaction system
   - [ ] Add descending bubble mechanics
 
-## Phase 5: Easter Eggs & Polish (Weeks 13-14)
+## Phase 3: Easter Egg Implementation (Weeks 7-8)
 
-### Milestone 5.1: Lobby Easter Eggs
-- [ ] **Interactive Elements**
-  - [ ] Classic Snake overlay game
-  - [ ] Physics-based text manipulation
-  - [ ] Explodable UI elements
-  - [ ] Gravity flip sandbox mode
+### Easter Egg: Classic Snake
+- [ ] UI Integration: Implement trigger and visual container within Hub UI
+- [ ] Core Mechanics: Implement specific gameplay logic
+- [ ] Controls: Implement PC/Mobile controls
+- [ ] Reset Logic: Implement functionality for the reset button
+- [ ] Basic Testing: Test activation, gameplay, and reset
 
-### Milestone 5.2: Asset Integration
-- [ ] **Visual Polish**
-  - [ ] Integrate AI-generated character models
-  - [ ] Add environment themes for each game
-  - [ ] Implement particle effects and animations
-  - [ ] Create consistent art style across all games
+### Easter Egg: Physics-Based Menu Text
+- [ ] UI Integration: Implement trigger and visual container within Hub UI
+- [ ] Core Mechanics: Implement specific gameplay logic
+- [ ] Controls: Implement PC/Mobile controls
+- [ ] Reset Logic: Implement functionality for the reset button
+- [ ] Basic Testing: Test activation, gameplay, and reset
 
-- [ ] **Audio Implementation**
-  - [ ] Add background music for each game
-  - [ ] Implement sound effects (jumps, collisions, coins)
-  - [ ] Create audio settings and controls
-  - [ ] Add accessibility audio features
+### Easter Egg: Explodable Text
+- [ ] UI Integration: Implement trigger and visual container within Hub UI
+- [ ] Core Mechanics: Implement specific gameplay logic
+- [ ] Controls: Implement PC/Mobile controls
+- [ ] Reset Logic: Implement functionality for the reset button
+- [ ] Basic Testing: Test activation, gameplay, and reset
 
-## Phase 6: Testing & Deployment (Weeks 15-16)
+### Easter Egg: Gravity Flip
+- [ ] UI Integration: Implement trigger and visual container within Hub UI
+- [ ] Core Mechanics: Implement specific gameplay logic
+- [ ] Controls: Implement PC/Mobile controls
+- [ ] Reset Logic: Implement functionality for the reset button
+- [ ] Basic Testing: Test activation, gameplay, and reset
 
-### Milestone 6.1: Comprehensive Testing
-- [ ] **Gameplay Testing**
-  - [ ] Test all mini-games on PC and mobile
-  - [ ] Verify tournament flow and scoring
-  - [ ] Test multiplayer synchronization
-  - [ ] Validate cross-platform compatibility
+### Easter Egg: Bubble Shooter (Requires detailed breakdown first)
+- [ ] Define detailed breakdown (Gameplay, Controls, etc.)
+- [ ] Implement based on breakdown
 
-- [ ] **Performance & Stress Testing**
-  - [ ] Test with 8 concurrent players
-  - [ ] Verify network latency targets
-  - [ ] Test disconnection/reconnection handling
-  - [ ] Optimize for target device performance
+## Phase 4: Asset Integration & Polish (Weeks 9-12)
 
-### Milestone 6.2: Final Polish & Deployment
-- [ ] **Bug Fixes & Optimization**
-  - [ ] Address all identified issues
-  - [ ] Final performance optimizations
-  - [ ] Code review and refactoring
-  - [ ] Documentation completion
+### High-Quality Asset Integration (Blender -> Unity)
+- [ ] Integrate final Player Character models/sprites (per game)
+- [ ] Integrate final Hazard/Obstacle models/sprites (per game)
+- [ ] Integrate final Environment assets/themes (per game)
+- [ ] Integrate final UI assets (buttons, icons, fonts)
+- [ ] Update configuration files to reference final assets
 
-- [ ] **Build & Release**
-  - [ ] Create final builds for all platforms
-  - [ ] Prepare store listings (if applicable)
-  - [ ] Set up analytics and monitoring
-  - [ ] Plan post-launch support
+### Animation & Effects Polish
+- [ ] Refine player animations (using final models/sprites)
+- [ ] Refine hazard animations
+- [ ] Add/Refine particle effects (thrust, explosions, collection, etc.)
+- [ ] Implement UI animations/transitions
+
+### Shop Implementation
+- [ ] Design and implement Shop UI
+- [ ] Implement logic for purchasing/unlocking per-game characters using persistent currency
+- [ ] Implement logic for selecting unlocked characters per game
+
+### Audio Implementation
+- [ ] Integrate background music (Hub, per game)
+- [ ] Integrate sound effects (UI clicks, jumps, collisions, coin collection, power-ups, etc.)
+
+## Phase 5: Testing & Refinement (Weeks 13-14)
+
+### Code Review & Refactoring Session
+- [ ] Review major systems (Core, Mini-Games) for clarity, maintainability, and performance improvements based on rules.md
+
+### Comprehensive Gameplay Testing
+- [ ] Test all mini-games thoroughly (single player & multiplayer)
+- [ ] Test all Easter eggs
+- [ ] Test core loop (hub, lobby, game transitions, results)
+- [ ] Test on all target platforms (PC, Mobile)
+
+### Multiplayer Stress Testing
+- [ ] Test with multiple concurrent players
+- [ ] Test handling of disconnections/reconnections (if supported)
+- [ ] Test latency compensation effectiveness
+
+### Security Review
+- [ ] Audit backend code (Node.js) and communication points for common vulnerabilities
+
+### Bug Fixing
+- [ ] Address all identified bugs from testing phases
+
+### Performance Optimization
+- [ ] Profile and optimize CPU, GPU, and network usage
+
+### Usability Testing
+- [ ] Gather feedback on controls, UI clarity, and overall experience
+
+## Phase 6: Documentation & Deployment (Weeks 15-16)
+
+### Finalize Documentation
+- [ ] Update README.md with final instructions
+- [ ] Ensure code is well-commented
+
+### Build Preparation
+- [ ] Configure build settings for PC platforms (Windows, Mac, Linux)
+- [ ] Configure build settings for Mobile platforms (iOS, Android)
+
+### Deployment
+- [ ] Create final builds
+- [ ] (Optional: Outline deployment steps to specific platforms/stores)
 
 ## Technical Architecture
 

@@ -101,9 +101,11 @@ party-royale/
 │   ├── src/               # Server source code
 │   └── package.json       # Node.js dependencies
 ├── docs/                  # Documentation
+│   └── prd_v1.29.md       # Product Requirements Document
 ├── logs/                  # Development conversation logs
 ├── roadmap.md            # Development roadmap
-└── CHANGELOG.md          # Version history
+├── CHANGELOG.md          # Version history
+└── AI Development Rules (`rules.md`).txt  # AI development guidelines
 ```
 
 ## 🎯 Development Roadmap
@@ -207,6 +209,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 For questions, issues, or suggestions:
 - Check the [roadmap.md](roadmap.md) for development status
 - Review the [CHANGELOG.md](CHANGELOG.md) for recent changes
+- See [AI Development Rules](AI%20Development%20Rules%20%28%60rules.md%60%29.txt) for AI development guidelines
+- Review the [Product Requirements Document](docs/prd_v1.29.md) for complete specifications
 - Open an issue on GitHub
 
 ---

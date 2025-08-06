@@ -8,14 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial project roadmap with 6-phase development plan
+- Initial project roadmap with 6-phase development plan and detailed checkbox tasks
 - Comprehensive README with project overview and setup instructions
 - CHANGELOG.md for tracking all development progress
 - Project structure documentation and technical architecture
+- Consolidated Product Requirements Document (docs/prd_v1.29.md) with complete design vision
 
 ### Changed
 - Updated project documentation to reflect complete design vision
 - Consolidated development approach as "vibe-coding" with AI assistance
+- Imported detailed tasks from Project TODO List into roadmap.md
+- Reorganized documentation structure with docs/ directory
+
+### Removed
+- Project TODO List.txt (tasks migrated to roadmap.md)
+- Old fragmented PRD content (consolidated into docs/prd_v1.29.md)
 
 ### Planned
 - Unity project setup with 2D/3D hybrid configuration
