@@ -29,12 +29,12 @@ namespace UnityBuilderAction
                 }
             }
             
-            // Get all scenes in build settings
-            string[] scenes = GetScenesFromBuildSettings();
+            // Get scenes to build (either from command line or build settings)
+            string[] scenes = GetScenesToBuild(args);
             
             if (scenes.Length == 0)
             {
-                Debug.LogError("No scenes found in build settings!");
+                Debug.LogError("No scenes found to build!");
                 EditorApplication.Exit(1);
                 return;
             }
@@ -78,6 +78,23 @@ namespace UnityBuilderAction
                 
                 EditorApplication.Exit(1);
             }
+        }
+        
+        private static string[] GetScenesToBuild(string[] args)
+        {
+            // Check for custom scene list from command line
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i] == "-sceneList" && i + 1 < args.Length)
+                {
+                    string scenePath = args[i + 1];
+                    Debug.Log($"Building specific scene: {scenePath}");
+                    return new string[] { scenePath };
+                }
+            }
+            
+            // Fall back to build settings
+            return GetScenesFromBuildSettings();
         }
         
         private static string[] GetScenesFromBuildSettings()

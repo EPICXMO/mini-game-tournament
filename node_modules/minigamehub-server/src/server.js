@@ -4,6 +4,8 @@ import { Server } from 'socket.io';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import { initializeDatabase, healthCheck } from './database.js';
+import scoreRoutes from './routes/scoreRoutes.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -47,13 +49,18 @@ app.get('/healthz', (req, res) => {
 });
 
 // API Routes
-app.get('/api/status', (req, res) => {
+app.get('/api/status', async (req, res) => {
+  const dbHealth = await healthCheck();
   res.json({
     message: 'MiniGameHub Server is running',
     connectedClients: io.engine.clientsCount,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    database: dbHealth
   });
 });
+
+// Score routes
+app.use('/api/score', scoreRoutes);
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
@@ -141,12 +148,26 @@ app.use('*', (req, res) => {
 const PORT = process.env.PORT || 4000;
 const HOST = process.env.HOST || '0.0.0.0';
 
-server.listen(PORT, HOST, () => {
-  console.log(`🚀 MiniGameHub Server started on ${HOST}:${PORT}`);
-  console.log(`📡 Socket.IO endpoint: ws://${HOST}:${PORT}/socket`);
-  console.log(`🏥 Health check: http://${HOST}:${PORT}/healthz`);
-  console.log(`📊 API status: http://${HOST}:${PORT}/api/status`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+async function startServer() {
+  // Initialize database
+  const dbInitialized = await initializeDatabase();
+  if (!dbInitialized && process.env.NODE_ENV !== 'test') {
+    console.warn('⚠️  Database initialization failed, but server will continue');
+  }
+
+  server.listen(PORT, HOST, () => {
+    console.log(`🚀 MiniGameHub Server started on ${HOST}:${PORT}`);
+    console.log(`📡 Socket.IO endpoint: ws://${HOST}:${PORT}/socket`);
+    console.log(`🏥 Health check: http://${HOST}:${PORT}/healthz`);
+    console.log(`📊 API status: http://${HOST}:${PORT}/api/status`);
+    console.log(`🎮 Jetpack scores: http://${HOST}:${PORT}/api/score/jetpack`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  });
+}
+
+startServer().catch(error => {
+  console.error('Failed to start server:', error);
+  process.exit(1);
 });
 
 // Graceful shutdown

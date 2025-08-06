@@ -69,6 +69,16 @@ jobs:
   unity-build:
     name: Unity Build Test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        scene: [Lobby, Jetpack]
+        include:
+          - scene: Lobby
+            scene_path: "Assets/Scenes/Lobby.unity"
+            build_name: "lobby-build"
+          - scene: Jetpack
+            scene_path: "Assets/MiniGames/Jetpack/Jetpack.unity"
+            build_name: "jetpack-build"
     
     steps:
     - name: Checkout code
@@ -80,11 +90,12 @@ jobs:
       uses: actions/cache@v3
       with:
         path: unity/MiniGameHub/Library
-        key: Library-${{ hashFiles('unity/MiniGameHub/Assets/**', 'unity/MiniGameHub/Packages/**', 'unity/MiniGameHub/ProjectSettings/**') }}
+        key: Library-${{ matrix.scene }}-${{ hashFiles('unity/MiniGameHub/Assets/**', 'unity/MiniGameHub/Packages/**', 'unity/MiniGameHub/ProjectSettings/**') }}
         restore-keys: |
+          Library-${{ matrix.scene }}-
           Library-
           
-    - name: Setup Unity
+    - name: Setup Unity - Build ${{ matrix.scene }}
       uses: game-ci/unity-builder@v4
       env:
         UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -95,12 +106,13 @@ jobs:
         targetPlatform: StandaloneWindows64
         buildMethod: UnityBuilderAction.BuildScript.Build
         allowDirtyBuild: true
+        customParameters: -sceneList "${{ matrix.scene_path }}"
         
-    - name: Upload Unity Build Artifact
+    - name: Upload Unity Build Artifact - ${{ matrix.scene }}
       uses: actions/upload-artifact@v3
       if: always()
       with:
-        name: unity-build-windows
+        name: unity-${{ matrix.build_name }}-windows
         path: build/
         retention-days: 1
 
