@@ -54,28 +54,77 @@ A cross-platform multiplayer hub featuring 6 classic-inspired mini-games with to
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/<my-user>/party-royale.git
-   cd party-royale
-   ```
+#### Prerequisites
+- **Unity 2022.3.21f1 LTS** or later
+- **Node.js 20+** and npm
+- **Git** for version control
+- **Docker** (optional, for database)
 
-2. **Set up the backend**
-   ```bash
-   cd backend
-   npm install
-   npm start
-   ```
+#### 1. Clone the repository
+```bash
+git clone https://github.com/EPICXMO/mini-game-tournament.git
+cd mini-game-tournament
+```
 
-3. **Open Unity project**
-   - Open Unity Hub
-   - Add the `unity_project/` folder as a project
-   - Open the project in Unity
+#### 2. Backend Setup
+```bash
+cd backend
 
-4. **Configure build settings**
-   - Set up Android SDK (for mobile builds)
-   - Configure iOS build settings (if targeting iOS)
-   - Set up Windows build target
+# Install dependencies
+npm install
+
+# Copy environment configuration
+cp env.example .env
+
+# Start development server
+npm run dev
+
+# Or start with Docker Compose (includes PostgreSQL)
+docker-compose up -d
+```
+
+The backend server will start on `http://localhost:4000`
+- Health check: `http://localhost:4000/healthz`
+- API status: `http://localhost:4000/api/status`
+- Socket.io endpoint: `ws://localhost:4000/socket`
+
+#### 3. Unity Setup
+```bash
+# Open Unity Hub
+# Add existing project: unity/MiniGameHub/
+# Open the project in Unity 2022.3 LTS
+```
+
+**Unity Project Structure:**
+- **Assets/Scripts/Core/**: Core game logic
+- **Assets/Scripts/Networking/**: Socket.io client and multiplayer
+- **Assets/Scripts/UI/**: User interface components
+- **Assets/Scripts/Tests/**: Unit tests
+- **Assets/Scenes/Lobby.unity**: Main lobby scene
+
+#### 4. Development Workflow
+```bash
+# Start backend in development mode
+cd backend && npm run dev
+
+# Open Unity project and press Play
+# The lobby will connect to the backend automatically
+```
+
+#### 5. Build Configuration
+**PC Build:**
+- File → Build Settings → PC, Mac & Linux Standalone
+- Target Platform: Windows x86_64
+
+**Android Build:**
+- Install Android SDK through Unity Hub
+- File → Build Settings → Android
+- Switch Platform → Build
+
+**iOS Build:**
+- Requires macOS and Xcode
+- File → Build Settings → iOS
+- Switch Platform → Build and Run
 
 ### Development Workflow
 
@@ -89,20 +138,30 @@ This project follows a **"vibe-coding"** approach with AI assistance:
 ## 📁 Project Structure
 
 ```
-party-royale/
-├── unity_project/          # Unity game client
+mini-game-tournament/
+├── unity/MiniGameHub/      # Unity game client
 │   ├── Assets/
 │   │   ├── Scripts/        # C# game logic
-│   │   ├── Prefabs/        # Reusable game objects
+│   │   │   ├── Core/       # Core game systems
+│   │   │   ├── Networking/ # Socket.io client
+│   │   │   ├── UI/         # User interface
+│   │   │   ├── Tests/      # Unit tests
+│   │   │   └── Editor/     # Build scripts
 │   │   ├── Scenes/         # Game scenes
-│   │   └── MiniGames/      # Individual mini-game modules
+│   │   └── Prefabs/        # Reusable game objects
 │   └── ProjectSettings/    # Unity configuration
 ├── backend/                # Node.js server
 │   ├── src/               # Server source code
+│   │   ├── routes/        # API routes
+│   │   ├── services/      # Business logic
+│   │   ├── middleware/    # Express middleware
+│   │   ├── config/        # Configuration
+│   │   └── models/        # Data models
+│   ├── docker-compose.yml # Docker services
 │   └── package.json       # Node.js dependencies
+├── .github/workflows/     # CI/CD pipelines
 ├── docs/                  # Documentation
 │   └── prd_v1.29.md       # Product Requirements Document
-├── logs/                  # Development conversation logs
 ├── roadmap.md            # Development roadmap
 ├── CHANGELOG.md          # Version history
 └── AI Development Rules (`rules.md`).txt  # AI development guidelines
