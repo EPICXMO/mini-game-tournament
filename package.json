@@ -1,0 +1,53 @@
+{
+  "name": "mini-game-tournament",
+  "version": "0.1.0",
+  "description": "AI Multiplayer Mini-Game Tournament - Cross-platform hub with 6 classic-inspired mini-games",
+  "private": true,
+  "workspaces": [
+    "backend"
+  ],
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev": "npm run dev:backend",
+    "build:backend": "cd backend && npm run build",
+    "test:backend": "cd backend && npm test",
+    "test": "npm run test:backend",
+    "lint": "cd backend && npm run lint",
+    "lint:fix": "cd backend && npm run lint:fix",
+    "format": "cd backend && npm run format",
+    "prepare": "husky",
+    "commit": "git-cz",
+    "release": "standard-version",
+    "release:dry": "standard-version --dry-run"
+  },
+  "devDependencies": {
+    "husky": "^9.0.11",
+    "commitlint": "^19.0.3",
+    "@commitlint/config-conventional": "^19.0.3",
+    "cz-conventional-changelog": "^3.3.0",
+    "standard-version": "^9.5.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EPICXMO/mini-game-tournament.git"
+  },
+  "keywords": [
+    "unity",
+    "multiplayer",
+    "mini-games",
+    "tournament",
+    "cross-platform",
+    "ai-assisted"
+  ],
+  "author": "MiniGameHub Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

@@ -1,0 +1,71 @@
+name: Release
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    # Only run if the push contains conventional commits
+    if: "!contains(github.event.head_commit.message, 'chore(release)')"
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Configure Git
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+    - name: Check for releasable changes
+      id: check-changes
+      run: |
+        # Check if there are any feat: or fix: commits since last tag
+        if git log $(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD~10")..HEAD --oneline | grep -E "^[a-f0-9]+ (feat|fix)"; then
+          echo "has-changes=true" >> $GITHUB_OUTPUT
+        else
+          echo "has-changes=false" >> $GITHUB_OUTPUT
+        fi
+      continue-on-error: true
+      
+    - name: Dry run standard-version
+      if: steps.check-changes.outputs.has-changes == 'true'
+      run: npx standard-version --dry-run
+      
+    - name: Create release
+      if: steps.check-changes.outputs.has-changes == 'true'
+      run: |
+        npx standard-version
+        git push --follow-tags origin main
+        
+    - name: Create GitHub Release
+      if: steps.check-changes.outputs.has-changes == 'true'
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ env.NEW_TAG }}
+        release_name: Release ${{ env.NEW_TAG }}
+        body_path: CHANGELOG.md
+        draft: false
+        prerelease: false
+        
+    - name: No release needed
+      if: steps.check-changes.outputs.has-changes == 'false'
+      run: echo "No releasable changes found. Skipping release."
