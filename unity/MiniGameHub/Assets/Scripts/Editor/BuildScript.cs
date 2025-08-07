@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using System;
+using System.IO;
 
 namespace UnityBuilderAction
 {
@@ -76,6 +77,57 @@ namespace UnityBuilderAction
                     }
                 }
                 
+                EditorApplication.Exit(1);
+            }
+        }
+
+        /// <summary>
+        /// Build all configured scenes for WebGL to build/WebGL
+        /// Intended for CI usage. If specific scenes are required,
+        /// set them in EditorBuildSettings or pass -sceneList via CLI.
+        /// </summary>
+        public static void BuildWebGLAll()
+        {
+            var outputPath = Path.Combine("build", "WebGL");
+
+            // Ensure output directory exists
+            if (!Directory.Exists(outputPath))
+            {
+                Directory.CreateDirectory(outputPath);
+            }
+
+            // Prefer explicit scenes if present in build settings; otherwise fall back
+            var scenes = GetScenesFromBuildSettings();
+            if (scenes.Length == 0)
+            {
+                // Fallback to known scenes
+                scenes = new[]
+                {
+                    "Assets/Scenes/Lobby.unity",
+                    "Assets/MiniGames/Jetpack/Jetpack.unity"
+                };
+            }
+
+            var options = new BuildPlayerOptions
+            {
+                scenes = scenes,
+                locationPathName = outputPath,
+                target = BuildTarget.WebGL,
+                options = BuildOptions.None
+            };
+
+            Debug.Log($"[BuildScript] Building WebGL to: {outputPath}");
+            Debug.Log($"[BuildScript] Scenes: {string.Join(", ", scenes)}");
+
+            var report = BuildPipeline.BuildPlayer(options);
+            if (report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded)
+            {
+                Debug.Log($"[BuildScript] WebGL build succeeded. Size: {report.summary.totalSize} bytes");
+                EditorApplication.Exit(0);
+            }
+            else
+            {
+                Debug.LogError($"[BuildScript] WebGL build failed: {report.summary.result}");
                 EditorApplication.Exit(1);
             }
         }
