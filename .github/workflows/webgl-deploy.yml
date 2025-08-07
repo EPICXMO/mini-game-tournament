@@ -5,6 +5,7 @@ on:
   pull_request:
     paths:
       - 'unity/**'
+      - '.github/workflows/webgl-deploy.yml'
   push:
     branches: [ master ]
     paths:
