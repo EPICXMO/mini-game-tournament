@@ -346,9 +346,9 @@
 - ✅ CI/CD Pipeline: GitHub Actions workflow for backend tests and Unity builds
 - ✅ Development Tooling: Husky hooks, Conventional Commits, automated releases
 
-### 🚀 Phase 2: First Mini-Game - Jetpack Joyride Clone (IN PROGRESS - Week 3-4)
+### ✅ Phase 2: First Mini-Game - Jetpack Joyride Clone (COMPLETED - Week 3-4)
 
-**Current Status**: Jetpack Joyride v0.1 mechanics implemented with:
+**Achievements**:
 - ✅ Unity scene with scrolling background and obstacle spawning
 - ✅ Player controller with jetpack thrust physics
 - ✅ PostgreSQL score submission API (`POST /api/score/jetpack`)
@@ -356,7 +356,17 @@
 - ✅ CI/CD matrix builds for both Lobby and Jetpack scenes
 - ✅ Documentation in `docs/mini-games.md`
 
-**Next**: Polish gameplay, add ghost multiplayer, integrate with tournament system.
+### 🚀 Phase 3: Ghost Multiplayer & Tournament Core (IN PROGRESS - Week 5-6)
+
+**Current Status**: Tournament system and ghost multiplayer implemented with:
+- ✅ TournamentService with round management and leaderboards
+- ✅ Socket.IO events for tournament lifecycle (create, join, start, score submission)
+- ✅ Ghost multiplayer position streaming between players
+- ✅ Unity TournamentManager and enhanced SocketClient
+- ✅ LobbyManager integration with tournament UI
+- ✅ Comprehensive Jest test suite for tournament service (38 tests passing)
+
+**Next**: Extend CI/CD, update docs, open Phase 3 PR.
 
 ---
 
