@@ -1,5 +1,6 @@
 using UnityEngine;
 using MiniGameHub.Networking;
+using MiniGameHub.Core;
 
 namespace MiniGameHub.UI
 {
@@ -14,6 +15,14 @@ namespace MiniGameHub.UI
         
         [Header("Networking")]
         [SerializeField] private SocketClient socketClient;
+        
+        [Header("Tournament")]
+        [SerializeField] private TournamentManager tournamentManager;
+        
+        // UI State
+        private string currentRoomId;
+        private string playerName = "Player";
+        private bool isInRoom = false;
         
         private void Start()
         {
@@ -47,10 +56,29 @@ namespace MiniGameHub.UI
                 }
             }
             
+            if (tournamentManager == null)
+            {
+                tournamentManager = FindObjectOfType<TournamentManager>();
+                if (tournamentManager == null)
+                {
+                    // Create a TournamentManager if one doesn't exist
+                    GameObject tournamentGO = new GameObject("TournamentManager");
+                    tournamentManager = tournamentGO.AddComponent<TournamentManager>();
+                }
+            }
+            
             // Subscribe to connection events
             socketClient.OnConnected += OnConnectedToServer;
             socketClient.OnDisconnected += OnDisconnectedFromServer;
             socketClient.OnError += OnConnectionError;
+            
+            // Subscribe to tournament events
+            if (tournamentManager != null)
+            {
+                tournamentManager.OnTournamentJoined += OnTournamentJoined;
+                tournamentManager.OnTournamentStarted += OnTournamentStarted;
+                tournamentManager.OnLeaderboardUpdated += OnLeaderboardUpdated;
+            }
         }
         
         /// <summary>
@@ -63,6 +91,8 @@ namespace MiniGameHub.UI
             if (socketClient != null && socketClient.IsConnected)
             {
                 socketClient.Emit("join_room", new { roomId = "default" });
+                currentRoomId = "default";
+                isInRoom = true;
             }
             else
             {
@@ -80,6 +110,8 @@ namespace MiniGameHub.UI
             if (socketClient != null && socketClient.IsConnected)
             {
                 socketClient.Emit("create_room", new { roomName = "New Room" });
+                // Room ID will be set when we receive the room_created event
+                isInRoom = true;
             }
             else
             {
@@ -113,12 +145,29 @@ namespace MiniGameHub.UI
             Debug.LogError($"[LobbyManager] Connection error: {error}");
         }
         
+        // Tournament event handlers
+        private void OnTournamentJoined(TournamentData tournament)
+        {
+            Debug.Log($"[LobbyManager] Joined tournament: {tournament.id}");
+        }
+        
+        private void OnTournamentStarted(TournamentStartData startData)
+        {
+            Debug.Log($"[LobbyManager] Tournament started - switching to game scene");
+            // TODO: Load the appropriate mini-game scene
+        }
+        
+        private void OnLeaderboardUpdated(LeaderboardEntry[] leaderboard)
+        {
+            Debug.Log($"[LobbyManager] Leaderboard updated with {leaderboard.Length} entries");
+        }
+        
         /// <summary>
         /// Simple immediate mode GUI for testing
         /// </summary>
         private void OnGUI()
         {
-            GUILayout.BeginArea(new Rect(50, 50, 200, 300));
+            GUILayout.BeginArea(new Rect(50, 50, 300, 500));
             
             GUILayout.Label("Mini Game Hub - Lobby", GUILayout.Height(30));
             GUILayout.Space(20);
@@ -128,18 +177,77 @@ namespace MiniGameHub.UI
             GUILayout.Label($"Status: {connectionStatus}");
             GUILayout.Space(10);
             
-            // Join Room button
-            if (GUILayout.Button("Join Room", GUILayout.Height(40)))
-            {
-                OnJoinRoomClicked();
-            }
-            
+            // Player name input
+            GUILayout.Label("Player Name:");
+            playerName = GUILayout.TextField(playerName, GUILayout.Height(25));
             GUILayout.Space(10);
             
-            // Create Room button
-            if (GUILayout.Button("Create Room", GUILayout.Height(40)))
+            // Room management
+            if (!isInRoom)
             {
-                OnCreateRoomClicked();
+                // Join Room button
+                if (GUILayout.Button("Join Room", GUILayout.Height(40)))
+                {
+                    OnJoinRoomClicked();
+                }
+                
+                GUILayout.Space(10);
+                
+                // Create Room button
+                if (GUILayout.Button("Create Room", GUILayout.Height(40)))
+                {
+                    OnCreateRoomClicked();
+                }
+            }
+            else
+            {
+                GUILayout.Label($"Room: {currentRoomId}");
+                GUILayout.Space(10);
+                
+                // Tournament management
+                if (tournamentManager != null && !tournamentManager.IsInTournament())
+                {
+                    if (GUILayout.Button("Create Tournament", GUILayout.Height(40)))
+                    {
+                        tournamentManager.CreateTournament(currentRoomId);
+                    }
+                    
+                    GUILayout.Space(10);
+                    
+                    // Mock tournament ID input for joining
+                    GUILayout.Label("Tournament ID to Join:");
+                    var tournamentId = GUILayout.TextField("", GUILayout.Height(25));
+                    if (GUILayout.Button("Join Tournament", GUILayout.Height(30)))
+                    {
+                        if (!string.IsNullOrEmpty(tournamentId))
+                        {
+                            tournamentManager.JoinTournament(tournamentId, playerName);
+                        }
+                    }
+                }
+                else if (tournamentManager != null && tournamentManager.IsInTournament())
+                {
+                    GUILayout.Label("In Tournament!");
+                    
+                    if (tournamentManager.CurrentTournament.status == "waiting")
+                    {
+                        if (GUILayout.Button("Start Tournament", GUILayout.Height(40)))
+                        {
+                            tournamentManager.StartTournament();
+                        }
+                    }
+                    
+                    // Show leaderboard
+                    if (tournamentManager.CurrentLeaderboard != null)
+                    {
+                        GUILayout.Space(10);
+                        GUILayout.Label("Leaderboard:");
+                        foreach (var entry in tournamentManager.CurrentLeaderboard)
+                        {
+                            GUILayout.Label($"{entry.rank}. {entry.playerName}: {entry.totalScore}");
+                        }
+                    }
+                }
             }
             
             GUILayout.Space(20);
@@ -173,12 +281,20 @@ namespace MiniGameHub.UI
         
         private void OnDestroy()
         {
-            // Unsubscribe from events
+            // Unsubscribe from socket events
             if (socketClient != null)
             {
                 socketClient.OnConnected -= OnConnectedToServer;
                 socketClient.OnDisconnected -= OnDisconnectedFromServer;
                 socketClient.OnError -= OnConnectionError;
+            }
+            
+            // Unsubscribe from tournament events
+            if (tournamentManager != null)
+            {
+                tournamentManager.OnTournamentJoined -= OnTournamentJoined;
+                tournamentManager.OnTournamentStarted -= OnTournamentStarted;
+                tournamentManager.OnLeaderboardUpdated -= OnLeaderboardUpdated;
             }
         }
     }

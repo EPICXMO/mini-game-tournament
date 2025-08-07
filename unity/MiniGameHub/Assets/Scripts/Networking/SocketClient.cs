@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MiniGameHub.Networking
@@ -17,6 +18,14 @@ namespace MiniGameHub.Networking
         public event Action OnConnected;
         public event Action OnDisconnected;
         public event Action<string> OnError;
+        
+        // Tournament Events
+        public event Action<TournamentData> OnTournamentCreated;
+        public event Action<TournamentData> OnTournamentJoined;
+        public event Action<TournamentStartData> OnTournamentStarted;
+        public event Action<LeaderboardData> OnLeaderboardUpdate;
+        public event Action<GhostPositionData> OnGhostPositionUpdate;
+        public event Action<PlayerScoreData> OnPlayerScoreUpdate;
         
         // Connection state
         public bool IsConnected { get; private set; }
@@ -101,12 +110,212 @@ namespace MiniGameHub.Networking
             SendPing();
         }
         
+        // Tournament Management Methods
+        
+        /// <summary>
+        /// Create a new tournament
+        /// </summary>
+        public void CreateTournament(string roomId, TournamentSettings settings = null)
+        {
+            if (!IsConnected)
+            {
+                Debug.LogWarning("[SocketClient] Cannot create tournament - not connected");
+                return;
+            }
+            
+            var data = new Dictionary<string, object>
+            {
+                ["roomId"] = roomId
+            };
+            
+            if (settings != null)
+            {
+                data["settings"] = settings.ToDictionary();
+            }
+            
+            Emit("create_tournament", data);
+            Debug.Log($"[SocketClient] Creating tournament for room: {roomId}");
+        }
+        
+        /// <summary>
+        /// Join an existing tournament
+        /// </summary>
+        public void JoinTournament(string tournamentId, string playerName)
+        {
+            if (!IsConnected)
+            {
+                Debug.LogWarning("[SocketClient] Cannot join tournament - not connected");
+                return;
+            }
+            
+            var data = new Dictionary<string, object>
+            {
+                ["tournamentId"] = tournamentId,
+                ["playerName"] = playerName
+            };
+            
+            Emit("join_tournament", data);
+            Debug.Log($"[SocketClient] Joining tournament: {tournamentId} as {playerName}");
+        }
+        
+        /// <summary>
+        /// Start a tournament
+        /// </summary>
+        public void StartTournament(string tournamentId)
+        {
+            if (!IsConnected)
+            {
+                Debug.LogWarning("[SocketClient] Cannot start tournament - not connected");
+                return;
+            }
+            
+            var data = new Dictionary<string, object>
+            {
+                ["tournamentId"] = tournamentId
+            };
+            
+            Emit("start_tournament", data);
+            Debug.Log($"[SocketClient] Starting tournament: {tournamentId}");
+        }
+        
+        /// <summary>
+        /// Send player position for ghost multiplayer
+        /// </summary>
+        public void SendPlayerPosition(Vector2 position)
+        {
+            if (!IsConnected) return;
+            
+            var data = new Dictionary<string, object>
+            {
+                ["position"] = new Dictionary<string, object>
+                {
+                    ["x"] = position.x,
+                    ["y"] = position.y
+                }
+            };
+            
+            Emit("player_position", data);
+        }
+        
+        /// <summary>
+        /// Submit score for current round
+        /// </summary>
+        public void SubmitScore(int score)
+        {
+            if (!IsConnected)
+            {
+                Debug.LogWarning("[SocketClient] Cannot submit score - not connected");
+                return;
+            }
+            
+            var data = new Dictionary<string, object>
+            {
+                ["score"] = score
+            };
+            
+            Emit("submit_score", data);
+            Debug.Log($"[SocketClient] Submitting score: {score}");
+        }
+        
+        /// <summary>
+        /// Get current tournament state
+        /// </summary>
+        public void GetTournamentState(string tournamentId)
+        {
+            if (!IsConnected)
+            {
+                Debug.LogWarning("[SocketClient] Cannot get tournament state - not connected");
+                return;
+            }
+            
+            var data = new Dictionary<string, object>
+            {
+                ["tournamentId"] = tournamentId
+            };
+            
+            Emit("get_tournament_state", data);
+        }
+        
         private void OnDestroy()
         {
             if (IsConnected)
             {
                 Disconnect();
             }
+        }
+    }
+    
+    // Data structures for tournament events
+    [System.Serializable]
+    public class TournamentData
+    {
+        public string id;
+        public string roomId;
+        public string status;
+        public int maxRounds;
+        public int playerCount;
+    }
+    
+    [System.Serializable]
+    public class TournamentStartData
+    {
+        public string tournamentId;
+        public int currentRound;
+        public int maxRounds;
+        public string game;
+    }
+    
+    [System.Serializable]
+    public class LeaderboardData
+    {
+        public LeaderboardEntry[] leaderboard;
+        public int round;
+    }
+    
+    [System.Serializable]
+    public class LeaderboardEntry
+    {
+        public int rank;
+        public string playerId;
+        public string playerName;
+        public int totalScore;
+        public int lastRoundScore;
+    }
+    
+    [System.Serializable]
+    public class GhostPositionData
+    {
+        public string playerId;
+        public Vector2 position;
+        public long timestamp;
+    }
+    
+    [System.Serializable]
+    public class PlayerScoreData
+    {
+        public string playerId;
+        public int score;
+        public int totalScore;
+        public int round;
+    }
+    
+    [System.Serializable]
+    public class TournamentSettings
+    {
+        public int maxRounds = 10;
+        public int autoStartDelay = 5000;
+        public int roundDuration = 60000;
+        public string[] gameRotation = { "jetpack" };
+        
+        public Dictionary<string, object> ToDictionary()
+        {
+            return new Dictionary<string, object>
+            {
+                ["maxRounds"] = maxRounds,
+                ["autoStartDelay"] = autoStartDelay,
+                ["roundDuration"] = roundDuration,
+                ["gameRotation"] = gameRotation
+            };
         }
     }
 }
