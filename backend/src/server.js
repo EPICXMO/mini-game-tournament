@@ -4,6 +4,7 @@ import { Server } from 'socket.io';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import logger from './logger.js';
 import { initializeDatabase, healthCheck } from './database.js';
 import scoreRoutes from './routes/scoreRoutes.js';
 import tournamentService from './services/tournamentService.js';
@@ -56,7 +57,9 @@ app.get('/api/status', async (req, res) => {
     message: 'MiniGameHub Server is running',
     connectedClients: io.engine.clientsCount,
     timestamp: new Date().toISOString(),
-    database: dbHealth
+    database: dbHealth,
+    version: process.env.npm_package_version || '1.0.0',
+    commit: process.env.GITHUB_SHA || process.env.VERCEL_GIT_COMMIT_SHA || 'unknown'
   });
 });
 
@@ -299,7 +302,7 @@ io.on('connection', (socket) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error('Server error:', err);
+  logger.error({ err }, 'Server error');
   res.status(500).json({
     error: 'Internal server error',
     message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
@@ -326,33 +329,33 @@ async function startServer() {
   }
 
   server.listen(PORT, HOST, () => {
-    console.log(`🚀 MiniGameHub Server started on ${HOST}:${PORT}`);
-    console.log(`📡 Socket.IO endpoint: ws://${HOST}:${PORT}/socket`);
-    console.log(`🏥 Health check: http://${HOST}:${PORT}/healthz`);
-    console.log(`📊 API status: http://${HOST}:${PORT}/api/status`);
-    console.log(`🎮 Jetpack scores: http://${HOST}:${PORT}/api/score/jetpack`);
-    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+    logger.info(`🚀 MiniGameHub Server started on ${HOST}:${PORT}`);
+    logger.info(`📡 Socket.IO endpoint: ws://${HOST}:${PORT}/socket`);
+    logger.info(`🏥 Health check: http://${HOST}:${PORT}/healthz`);
+    logger.info(`📊 API status: http://${HOST}:${PORT}/api/status`);
+    logger.info(`🎮 Jetpack scores: http://${HOST}:${PORT}/api/score/jetpack`);
+    logger.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   });
 }
 
 startServer().catch(error => {
-  console.error('Failed to start server:', error);
+  logger.error({ error }, 'Failed to start server');
   process.exit(1);
 });
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
+  logger.info('SIGTERM received, shutting down gracefully');
   server.close(() => {
-    console.log('Server closed');
+    logger.info('Server closed');
     process.exit(0);
   });
 });
 
 process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully');
+  logger.info('SIGINT received, shutting down gracefully');
   server.close(() => {
-    console.log('Server closed');
+    logger.info('Server closed');
     process.exit(0);
   });
 });
