@@ -104,7 +104,8 @@ namespace UnityBuilderAction
                 scenes = new[]
                 {
                     "Assets/Scenes/Lobby.unity",
-                    "Assets/MiniGames/Jetpack/Jetpack.unity"
+                    "Assets/MiniGames/Jetpack/Jetpack.unity",
+                    "Assets/MiniGames/Runner/Runner.unity"
                 };
             }
 

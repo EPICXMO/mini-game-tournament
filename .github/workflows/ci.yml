@@ -71,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        scene: [Lobby, Jetpack]
+        scene: [Lobby, Jetpack, Runner]
         include:
           - scene: Lobby
             scene_path: "Assets/Scenes/Lobby.unity"
@@ -79,6 +79,9 @@ jobs:
           - scene: Jetpack
             scene_path: "Assets/MiniGames/Jetpack/Jetpack.unity"
             build_name: "jetpack-build"
+          - scene: Runner
+            scene_path: "Assets/MiniGames/Runner/Runner.unity"
+            build_name: "runner-build"
     
     steps:
     - name: Checkout code
