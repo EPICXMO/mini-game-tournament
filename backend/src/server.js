@@ -61,6 +61,41 @@ app.get('/api/status', async (req, res) => {
   });
 });
 
+// Leaderboard endpoint (persisted)
+app.get('/api/leaderboard/:gameId', async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit) || 10, 50);
+    // Aggregate round_scores joined with tournament_rounds by gameId
+    const { query } = await import('./database.js');
+    const result = await query(
+      `SELECT rs.user_id, MAX(rs.score) AS top_score
+       FROM round_scores rs
+       JOIN tournament_rounds tr ON tr.id = rs.round_id
+       WHERE tr.game_id = $1
+       GROUP BY rs.user_id
+       ORDER BY top_score DESC
+       LIMIT $2`,
+      [req.params.gameId, limit]
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'LEADERBOARD_FETCH_FAILED' });
+  }
+});
+
+// Tournament status endpoint
+app.get('/api/tournament/:id/status', async (req, res) => {
+  try {
+    // For simplicity, return in-memory state if present
+    const tournament = (await import('./services/tournamentService.js')).then(m => m.default.getTournament(req.params.id));
+    const t = await tournament;
+    if (!t) return res.status(404).json({ error: 'NOT_FOUND' });
+    res.json({ success: true, data: t });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'TOURNAMENT_STATUS_FAILED' });
+  }
+});
+
 // Score routes
 app.use('/api/score', scoreRoutes);
 

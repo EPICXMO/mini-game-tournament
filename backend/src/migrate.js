@@ -8,6 +8,10 @@ const __dirname = path.dirname(__filename);
 
 export async function runMigrations() {
   try {
+    if (process.env.SKIP_MIGRATIONS === '1') {
+      console.log('⏭️  SKIP_MIGRATIONS=1 - skipping migrations');
+      return;
+    }
     const migrationsDir = path.join(__dirname, '../database/migrations');
     if (!fs.existsSync(migrationsDir)) {
       return;

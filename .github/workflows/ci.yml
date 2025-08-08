@@ -57,6 +57,7 @@ jobs:
       env:
         NODE_ENV: test
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/minigamehub_test
+        SKIP_MIGRATIONS: '1'
         
     - name: Check server starts
       run: |
