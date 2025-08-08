@@ -177,6 +177,44 @@ describe('Score Routes', () => {
     });
   });
 
+  describe('Runner endpoints', () => {
+    it('should submit a valid Runner score', async () => {
+      const mockScoreData = {
+        id: 10,
+        userId: 1,
+        gameType: 'runner',
+        score: 1200,
+        distance: 600,
+        coinsCollected: 10,
+        gameTime: 40,
+        createdAt: new Date().toISOString()
+      };
+
+      mockSubmitScore.mockResolvedValue(mockScoreData);
+
+      const response = await request(app)
+        .post('/api/score/runner')
+        .send({ score: 1200, distance: 600, coins: 10, time: 40, userId: 1 });
+
+      expect(response.status).toBe(201);
+      expect(response.body.success).toBe(true);
+      expect(mockSubmitScore).toHaveBeenCalledWith(
+        expect.objectContaining({ gameType: 'runner', score: 1200, distance: 600 })
+      );
+    });
+
+    it('should return Runner leaderboard', async () => {
+      const mockLeaderboard = [];
+      mockGetLeaderboard.mockResolvedValue(mockLeaderboard);
+
+      const response = await request(app)
+        .get('/api/score/runner/leaderboard?limit=10');
+
+      expect(response.status).toBe(200);
+      expect(mockGetLeaderboard).toHaveBeenCalledWith('runner', 10);
+    });
+  });
+
   describe('GET /api/score/jetpack/leaderboard', () => {
     it('should return Jetpack leaderboard', async () => {
       const mockLeaderboard = [
