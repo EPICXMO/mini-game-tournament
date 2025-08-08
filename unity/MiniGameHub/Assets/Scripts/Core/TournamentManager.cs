@@ -59,6 +59,12 @@ namespace MiniGameHub.Core
             socketClient.OnLeaderboardUpdate += HandleLeaderboardUpdate;
             socketClient.OnGhostPositionUpdate += HandleGhostPositionUpdate;
             socketClient.OnPlayerScoreUpdate += HandlePlayerScoreUpdate;
+
+            // Attempt to cache a simple user id (in a real app, this would be an auth id)
+            if (!PlayerPrefs.HasKey("mgh.userId"))
+            {
+                PlayerPrefs.SetString("mgh.userId", System.Guid.NewGuid().ToString());
+            }
         }
         
         private void OnDestroy()

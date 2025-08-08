@@ -2,6 +2,8 @@
  * Tournament Service - Manages tournament rounds, scoring, and leaderboards
  */
 
+import { saveTournament, addTournamentPlayer, createRound as repoCreateRound, completeRound as repoCompleteRound, submitRoundScore as repoSubmitRoundScore } from '../repositories/tournamentRepo.js';
+
 class TournamentService {
   constructor() {
     this.tournaments = new Map(); // tournamentId -> tournament data
@@ -33,6 +35,8 @@ class TournamentService {
     };
 
     this.tournaments.set(tournamentId, tournament);
+    // Best-effort persistence (non-fatal if DB unavailable)
+    saveTournament(tournament).catch(() => {});
     console.log(`[Tournament] Created tournament: ${tournamentId} for room: ${roomId}`);
     
     return tournament;
@@ -64,6 +68,7 @@ class TournamentService {
 
     tournament.players.set(playerId, player);
     this.players.set(playerId, { ...player, tournamentId });
+    addTournamentPlayer(tournamentId, playerId, player.name).catch(() => {});
 
     console.log(`[Tournament] Player ${playerId} joined tournament: ${tournamentId}`);
     return player;
@@ -123,7 +128,9 @@ class TournamentService {
     const gameIndex = (tournament.currentRound - 1) % tournament.settings.gameRotation.length;
     const selectedGame = tournament.settings.gameRotation[gameIndex];
 
+    const roundId = `round_${tournament.id}_${tournament.currentRound}`;
     const round = {
+      id: roundId,
       number: tournament.currentRound,
       game: selectedGame,
       status: 'active',
@@ -143,6 +150,8 @@ class TournamentService {
     });
 
     tournament.rounds.push(round);
+    repoCreateRound(roundId, tournament.id, selectedGame, tournament.currentRound, round.startedAt).catch(() => {});
+    saveTournament(tournament).catch(() => {});
     
     console.log(`[Tournament] Started round ${tournament.currentRound}/${tournament.maxRounds} (${selectedGame}) for tournament: ${tournamentId}`);
     return round;
@@ -206,6 +215,9 @@ class TournamentService {
       player.totalScore += score;
     }
 
+    // Persist score best-effort
+    repoSubmitRoundScore(currentRound.id, playerId, score, new Date().toISOString()).catch(() => {});
+    saveTournament(tournament).catch(() => {});
     console.log(`[Tournament] Player ${playerId} submitted score: ${score} for round ${tournament.currentRound}`);
     
     // Check if all players finished
@@ -233,6 +245,8 @@ class TournamentService {
     if (allFinished) {
       currentRound.status = 'completed';
       currentRound.completedAt = new Date().toISOString();
+      repoCompleteRound(currentRound.id, currentRound.completedAt).catch(() => {});
+      saveTournament(tournament).catch(() => {});
       
       // Update leaderboard
       this.updateLeaderboard(tournamentId);

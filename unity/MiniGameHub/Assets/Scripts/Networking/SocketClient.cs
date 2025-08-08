@@ -10,6 +10,8 @@ namespace MiniGameHub.Networking
     /// </summary>
     public class SocketClient : MonoBehaviour
     {
+        private const string PlayerPrefsTournamentId = "mgh.tournamentId";
+        private const string PlayerPrefsUserId = "mgh.userId";
         [Header("Connection Settings")]
         [SerializeField] private string serverUrl = "http://localhost:4000";
         [SerializeField] private bool autoConnect = true;
@@ -35,6 +37,17 @@ namespace MiniGameHub.Networking
             if (autoConnect)
             {
                 Connect();
+            }
+            // Attempt reconnect with cached ids
+            var cachedTournament = PlayerPrefs.GetString(PlayerPrefsTournamentId, string.Empty);
+            var cachedUser = PlayerPrefs.GetString(PlayerPrefsUserId, string.Empty);
+            if (!string.IsNullOrEmpty(cachedTournament) && !string.IsNullOrEmpty(cachedUser))
+            {
+                Emit("reconnect_tournament", new Dictionary<string, object>
+                {
+                    ["tournamentId"] = cachedTournament,
+                    ["userId"] = cachedUser
+                });
             }
         }
         
@@ -156,6 +169,7 @@ namespace MiniGameHub.Networking
             
             Emit("join_tournament", data);
             Debug.Log($"[SocketClient] Joining tournament: {tournamentId} as {playerName}");
+            PlayerPrefs.SetString(PlayerPrefsTournamentId, tournamentId);
         }
         
         /// <summary>

@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import { initializeDatabase, healthCheck } from './database.js';
 import { runMigrations } from './migrate.js';
 import leaderboardRoutes from './routes/leaderboardRoutes.js';
+import tournamentStatusRoutes from './routes/tournamentStatusRoutes.js';
 import scoreRoutes from './routes/scoreRoutes.js';
 import tournamentService from './services/tournamentService.js';
 import { fileURLToPath } from 'url';
@@ -100,6 +101,7 @@ app.get('/api/tournament/:id/status', async (req, res) => {
 // Score routes
 app.use('/api/score', scoreRoutes);
 app.use('/api', leaderboardRoutes);
+app.use('/api', tournamentStatusRoutes);
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
@@ -155,6 +157,29 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Reconnect handler
+  socket.on('reconnect_tournament', (data) => {
+    try {
+      const { tournamentId, userId } = data || {};
+      if (!tournamentId || !userId) return;
+      const t = tournamentService.getTournament(tournamentId);
+      if (!t) return;
+      const room = `tournament:${tournamentId}`;
+      socket.join(room);
+      // emit snapshot
+      io.to(socket.id).emit('tournament_state', {
+        tournament: {
+          id: t.id,
+          status: t.status,
+          currentRound: t.currentRound,
+          maxRounds: t.maxRounds,
+          playerCount: t.players.size
+        },
+        leaderboard: t.leaderboard,
+        ghostData: tournamentService.getGhostData(tournamentId)
+      });
+    } catch {}
+  });
   // Tournament Management
   socket.on('create_tournament', (data) => {
     try {
