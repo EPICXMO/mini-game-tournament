@@ -1,14 +1,25 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
+import { z } from 'zod';
 import { ScoreService } from '../services/scoreService.js';
 
 const router = express.Router();
 
+const scoreLimiter = rateLimit({ windowMs: 60 * 1000, max: 120 });
+
 /**
  * POST /api/score/jetpack - Submit a Jetpack game score
  */
-router.post('/jetpack', async (req, res) => {
+router.post('/jetpack', scoreLimiter, async (req, res) => {
   try {
-    const { score, distance, coins, time, userId } = req.body;
+    const BodySchema = z.object({
+      score: z.number().int().nonnegative(),
+      distance: z.number().int().nonnegative().optional(),
+      coins: z.number().int().nonnegative().optional(),
+      time: z.number().nonnegative().optional(),
+      userId: z.number().int().positive().optional()
+    });
+    const { score, distance, coins, time, userId } = BodySchema.parse(req.body);
 
     // Validate required fields
     if (score === undefined || score === null) {
@@ -57,20 +68,15 @@ router.post('/jetpack', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error submitting Jetpack score:', error);
-    
-    res.status(500).json({
-      error: 'Failed to submit score',
-      code: 'SCORE_SUBMISSION_FAILED',
-      message: error.message
-    });
+    const status = error?.name === 'ZodError' ? 400 : 500;
+    res.status(status).json({ error: status === 400 ? 'INVALID_REQUEST' : 'SCORE_SUBMISSION_FAILED' });
   }
 });
 
 /**
  * GET /api/score/jetpack/leaderboard - Get Jetpack leaderboard
  */
-router.get('/jetpack/leaderboard', async (req, res) => {
+router.get('/jetpack/leaderboard', scoreLimiter, async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit) || 10, 50); // Max 50 entries
 

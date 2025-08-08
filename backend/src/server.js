@@ -8,6 +8,7 @@ import { initializeDatabase, healthCheck } from './database.js';
 import { runMigrations } from './migrate.js';
 import leaderboardRoutes from './routes/leaderboardRoutes.js';
 import tournamentStatusRoutes from './routes/tournamentStatusRoutes.js';
+import { buildReconnectPayload } from './reconnectHelper.js';
 import scoreRoutes from './routes/scoreRoutes.js';
 import tournamentService from './services/tournamentService.js';
 import { fileURLToPath } from 'url';
@@ -166,18 +167,8 @@ io.on('connection', (socket) => {
       if (!t) return;
       const room = `tournament:${tournamentId}`;
       socket.join(room);
-      // emit snapshot
-      io.to(socket.id).emit('tournament_state', {
-        tournament: {
-          id: t.id,
-          status: t.status,
-          currentRound: t.currentRound,
-          maxRounds: t.maxRounds,
-          playerCount: t.players.size
-        },
-        leaderboard: t.leaderboard,
-        ghostData: tournamentService.getGhostData(tournamentId)
-      });
+      const snapshot = buildReconnectPayload(tournamentId);
+      if (snapshot) io.to(socket.id).emit('tournament_state', snapshot);
     } catch {}
   });
   // Tournament Management
