@@ -7,7 +7,8 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci --only=production
+ENV NODE_ENV=production
+RUN npm ci --omit=dev
 
 # Copy source code
 COPY src/ ./src/
@@ -31,4 +32,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     req.end();"
 
 # Start the application
+ENV DB_INIT_ON_STARTUP=false
 CMD ["npm", "start"]
