@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop, 'feature/*' ]
+    branches: [ main, develop, 'feature/*', 'feat/**', 'chore/**', master ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, master ]
 
 env:
   UNITY_VERSION: 2022.3.21f1
