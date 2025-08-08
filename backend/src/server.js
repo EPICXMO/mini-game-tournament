@@ -33,8 +33,14 @@ const io = new Server(server, {
 
 // Middleware
 app.use(helmet());
+const corsAllow = (process.env.CORS_ALLOWLIST || process.env.CORS_ORIGIN || 'http://localhost:3000')
+  .split(',')
+  .map(s => s.trim());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+  origin: function(origin, cb){
+    if (!origin || corsAllow.indexOf(origin) !== -1) return cb(null, true);
+    return cb(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 app.use(express.json());
