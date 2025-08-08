@@ -86,6 +86,8 @@ docker-compose up -d
 The backend server will start on `http://localhost:4000`
 - Health check: `http://localhost:4000/healthz`
 - API status: `http://localhost:4000/api/status`
+- Leaderboard: `http://localhost:4000/api/leaderboard/:gameId?limit=10`
+- Tournament status: `http://localhost:4000/api/tournament/:id/status`
 - Socket.io endpoint: `ws://localhost:4000/socket`
 
 #### 3. Unity Setup
