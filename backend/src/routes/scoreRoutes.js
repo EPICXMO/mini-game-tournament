@@ -43,6 +43,7 @@ router.post('/jetpack', async (req, res) => {
     const result = await ScoreService.submitScore(scoreData);
 
     // Return success response
+    res.set('Cache-Control', 'no-store');
     res.status(201).json({
       success: true,
       message: 'Score submitted successfully',
@@ -76,6 +77,7 @@ router.get('/jetpack/leaderboard', async (req, res) => {
 
     const leaderboard = await ScoreService.getLeaderboard('jetpack', limit);
 
+    res.set('Cache-Control', 'public, max-age=30, s-maxage=60, stale-while-revalidate=30');
     res.json({
       success: true,
       data: {
@@ -102,6 +104,7 @@ router.get('/jetpack/stats', async (req, res) => {
   try {
     const stats = await ScoreService.getGameStats('jetpack');
 
+    res.set('Cache-Control', 'public, max-age=30, s-maxage=60, stale-while-revalidate=30');
     res.json({
       success: true,
       data: {
@@ -141,6 +144,7 @@ router.get('/jetpack/user/:userId', async (req, res) => {
       ScoreService.getUserRecentScores(userId, 'jetpack', limit)
     ]);
 
+    res.set('Cache-Control', 'private, max-age=10');
     res.json({
       success: true,
       data: {

@@ -9,6 +9,7 @@ import scoreRoutes from './routes/scoreRoutes.js';
 import tournamentService from './services/tournamentService.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import compression from 'compression';
 
 // Load environment variables
 dotenv.config();
@@ -27,20 +28,26 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
     credentials: true
   },
-  path: '/socket'
+  path: '/socket',
+  perMessageDeflate: { threshold: 1024 },
+  maxHttpBufferSize: 1e6
 });
 
 // Middleware
+app.disable('x-powered-by');
+app.set('etag', 'strong');
 app.use(helmet());
 app.use(cors({
   origin: process.env.CORS_ORIGIN || "http://localhost:3000",
   credentials: true
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(compression());
+app.use(express.json({ limit: '64kb' }));
+app.use(express.urlencoded({ extended: true, limit: '64kb' }));
 
 // Health check endpoint
 app.get('/healthz', (req, res) => {
+  res.set('Cache-Control', 'no-store');
   res.status(200).json({
     status: 'OK',
     timestamp: new Date().toISOString(),
@@ -51,6 +58,7 @@ app.get('/healthz', (req, res) => {
 
 // API Routes
 app.get('/api/status', async (req, res) => {
+  res.set('Cache-Control', 'no-store');
   const dbHealth = await healthCheck();
   res.json({
     message: 'MiniGameHub Server is running',
@@ -188,8 +196,15 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Ghost Multiplayer - Position Updates
+  // Ghost Multiplayer - Position Updates (throttled)
   socket.on('player_position', (data) => {
+    const now = Date.now();
+    const minInterval = parseInt(process.env.POSITION_BROADCAST_INTERVAL_MS || '50', 10);
+    if (socket.data.lastGhostEmitAt && now - socket.data.lastGhostEmitAt < minInterval) {
+      return;
+    }
+    socket.data.lastGhostEmitAt = now;
+
     const { position } = data;
     const updated = tournamentService.updatePlayerPosition(socket.id, position);
     
@@ -202,7 +217,7 @@ io.on('connection', (socket) => {
           socket.to(tournament.roomId).emit('ghost_position', {
             playerId: socket.id,
             position,
-            timestamp: Date.now()
+            timestamp: now
           });
         }
       }

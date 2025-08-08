@@ -33,6 +33,10 @@ pool.on('error', (err) => {
  */
 export async function initializeDatabase() {
   try {
+    if (process.env.DB_INIT_ON_STARTUP !== 'true') {
+      console.log('🗄️  Skipping database initialization (DB_INIT_ON_STARTUP!=true)');
+      return true;
+    }
     console.log('🗄️  Initializing database...');
     
     // Read and execute schema
@@ -57,7 +61,9 @@ export async function query(text, params) {
   try {
     const res = await pool.query(text, params);
     const duration = Date.now() - start;
-    console.log('📊 Query executed', { text, duration, rows: res.rowCount });
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('📊 Query executed', { duration, rows: res.rowCount });
+    }
     return res;
   } catch (error) {
     console.error('❌ Database query error:', error.message);
