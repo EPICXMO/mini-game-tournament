@@ -5,6 +5,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { initializeDatabase, healthCheck } from './database.js';
+import { runMigrations } from './migrate.js';
 import scoreRoutes from './routes/scoreRoutes.js';
 import tournamentService from './services/tournamentService.js';
 import { fileURLToPath } from 'url';
@@ -321,6 +322,9 @@ const HOST = process.env.HOST || '0.0.0.0';
 async function startServer() {
   // Initialize database
   const dbInitialized = await initializeDatabase();
+  if (dbInitialized) {
+    await runMigrations().catch(() => {});
+  }
   if (!dbInitialized && process.env.NODE_ENV !== 'test') {
     console.warn('⚠️  Database initialization failed, but server will continue');
   }
