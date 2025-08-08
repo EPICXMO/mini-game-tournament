@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { initializeDatabase, healthCheck } from './database.js';
 import { runMigrations } from './migrate.js';
+import leaderboardRoutes from './routes/leaderboardRoutes.js';
 import scoreRoutes from './routes/scoreRoutes.js';
 import tournamentService from './services/tournamentService.js';
 import { fileURLToPath } from 'url';
@@ -98,6 +99,7 @@ app.get('/api/tournament/:id/status', async (req, res) => {
 
 // Score routes
 app.use('/api/score', scoreRoutes);
+app.use('/api', leaderboardRoutes);
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
