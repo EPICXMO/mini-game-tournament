@@ -1,6 +1,7 @@
 /**
  * Tournament Service - Manages tournament rounds, scoring, and leaderboards
  */
+import botService from './botService.js';
 
 class TournamentService {
   constructor() {
@@ -28,6 +29,9 @@ class TournamentService {
         autoStartDelay: settings.autoStartDelay || 5000, // 5 seconds
         roundDuration: settings.roundDuration || 60000, // 60 seconds
         gameRotation: settings.gameRotation || ['jetpack'], // available mini-games
+        maxPlayers: settings.maxPlayers || 8,
+        autoFillWithBots: settings.autoFillWithBots !== false, // Default true
+        botSkillLevels: settings.botSkillLevels || ['easy', 'medium', 'hard'],
         ...settings
       }
     };
@@ -94,6 +98,11 @@ class TournamentService {
 
     if (tournament.players.size === 0) {
       throw new Error('Cannot start tournament with no players');
+    }
+
+    // Auto-fill with bots if enabled and tournament isn't full
+    if (tournament.settings.autoFillWithBots) {
+      this.autoFillWithBots(tournamentId);
     }
 
     tournament.status = 'active';
@@ -346,8 +355,11 @@ class TournamentService {
       const tournamentAge = now - new Date(tournament.createdAt).getTime();
       
       if (tournament.status === 'completed' && tournamentAge > maxAge) {
-        // Remove all players from this tournament
+        // Remove bots associated with this tournament
         tournament.players.forEach((player, playerId) => {
+          if (player.isBot) {
+            botService.removeBot(playerId);
+          }
           this.players.delete(playerId);
         });
         
@@ -355,6 +367,134 @@ class TournamentService {
         console.log(`[Tournament] Cleaned up old tournament: ${tournamentId}`);
       }
     }
+  }
+
+  /**
+   * Auto-fill tournament with bots to reach desired player count
+   */
+  autoFillWithBots(tournamentId) {
+    const tournament = this.tournaments.get(tournamentId);
+    if (!tournament) return false;
+
+    const currentPlayerCount = tournament.players.size;
+    const maxPlayers = tournament.settings.maxPlayers;
+    const botsNeeded = Math.max(0, maxPlayers - currentPlayerCount);
+
+    if (botsNeeded === 0) {
+      console.log(`[Tournament] Tournament ${tournamentId} already has maximum players`);
+      return true;
+    }
+
+    const gameType = tournament.settings.gameRotation[0] || 'jetpack'; // Use first game type
+    const botSkillLevels = tournament.settings.botSkillLevels;
+
+    console.log(`[Tournament] Adding ${botsNeeded} bots to tournament ${tournamentId}`);
+
+    for (let i = 0; i < botsNeeded; i++) {
+      // Cycle through skill levels
+      const skillLevel = botSkillLevels[i % botSkillLevels.length];
+      
+      try {
+        const bot = botService.createBot(gameType, skillLevel);
+        
+        // Add bot as a player to the tournament
+        this.addPlayer(tournamentId, bot.id, {
+          name: bot.name,
+          isBot: true,
+          botSkillLevel: skillLevel
+        });
+
+        console.log(`[Tournament] Added ${skillLevel} bot ${bot.id} to tournament ${tournamentId}`);
+      } catch (error) {
+        console.error(`[Tournament] Failed to create bot for tournament ${tournamentId}:`, error.message);
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Check if player is a bot
+   */
+  isPlayerBot(playerId) {
+    const playerData = this.players.get(playerId);
+    return playerData && playerData.isBot === true;
+  }
+
+  /**
+   * Get bot instance for a player
+   */
+  getBotForPlayer(playerId) {
+    if (this.isPlayerBot(playerId)) {
+      return botService.getBot(playerId);
+    }
+    return null;
+  }
+
+  /**
+   * Start bots for a round
+   */
+  startBotsForRound(tournamentId, roundData) {
+    const tournament = this.tournaments.get(tournamentId);
+    if (!tournament) return false;
+
+    let botCount = 0;
+    for (const [playerId, player] of tournament.players) {
+      if (player.isBot) {
+        const bot = botService.getBot(playerId);
+        if (bot) {
+          botService.startBot(playerId, roundData);
+          botCount++;
+        }
+      }
+    }
+
+    console.log(`[Tournament] Started ${botCount} bots for round in tournament ${tournamentId}`);
+    return true;
+  }
+
+  /**
+   * Stop bots for a round
+   */
+  stopBotsForRound(tournamentId, roundResults = {}) {
+    const tournament = this.tournaments.get(tournamentId);
+    if (!tournament) return false;
+
+    let botCount = 0;
+    for (const [playerId, player] of tournament.players) {
+      if (player.isBot) {
+        const result = roundResults[playerId] || {};
+        const finalScore = result.score || player.totalScore;
+        const gameTime = result.gameTime || 0;
+        
+        botService.stopBot(playerId, finalScore, gameTime);
+        botCount++;
+      }
+    }
+
+    console.log(`[Tournament] Stopped ${botCount} bots for round in tournament ${tournamentId}`);
+    return true;
+  }
+
+  /**
+   * Make bot decisions for active round
+   */
+  makeBotDecisions(tournamentId, gameState) {
+    const tournament = this.tournaments.get(tournamentId);
+    if (!tournament || tournament.status !== 'active') return {};
+
+    const botDecisions = {};
+
+    for (const [playerId, player] of tournament.players) {
+      if (player.isBot) {
+        const decision = botService.makeBotDecision(playerId, gameState);
+        if (decision) {
+          botDecisions[playerId] = decision;
+        }
+      }
+    }
+
+    return botDecisions;
   }
 }
 
