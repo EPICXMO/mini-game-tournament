@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { initializeDatabase, healthCheck } from './database.js';
 import scoreRoutes from './routes/scoreRoutes.js';
+import aiBotRoutes from './routes/aiBotRoutes.js';
 import tournamentService from './services/tournamentService.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -62,6 +63,9 @@ app.get('/api/status', async (req, res) => {
 
 // Score routes
 app.use('/api/score', scoreRoutes);
+
+// AI Bot routes
+app.use('/api/bots', aiBotRoutes);
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
