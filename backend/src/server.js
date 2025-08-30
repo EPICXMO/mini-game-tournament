@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { initializeDatabase, healthCheck } from './database.js';
 import scoreRoutes from './routes/scoreRoutes.js';
+import aiPlayerRoutes from './routes/aiPlayerRoutes.js';
 import tournamentService from './services/tournamentService.js';
 
 // Load environment variables
@@ -57,6 +58,9 @@ app.get('/api/status', async (req, res) => {
 
 // Score routes
 app.use('/api/score', scoreRoutes);
+
+// AI Player routes
+app.use('/api/ai', aiPlayerRoutes);
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
