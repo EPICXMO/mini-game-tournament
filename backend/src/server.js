@@ -7,14 +7,9 @@ import dotenv from 'dotenv';
 import { initializeDatabase, healthCheck } from './database.js';
 import scoreRoutes from './routes/scoreRoutes.js';
 import tournamentService from './services/tournamentService.js';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
 
 // Load environment variables
 dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 // Create Express app
 const app = express();
@@ -23,8 +18,8 @@ const server = createServer(app);
 // Configure Socket.IO with CORS
 const io = new Server(server, {
   cors: {
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
-    methods: ["GET", "POST"],
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    methods: ['GET', 'POST'],
     credentials: true
   },
   path: '/socket'
@@ -33,7 +28,7 @@ const io = new Server(server, {
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   credentials: true
 }));
 app.use(express.json());
@@ -298,7 +293,7 @@ io.on('connection', (socket) => {
 });
 
 // Error handling middleware
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
   console.error('Server error:', err);
   res.status(500).json({
     error: 'Internal server error',
