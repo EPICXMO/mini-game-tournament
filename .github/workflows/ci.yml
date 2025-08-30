@@ -49,6 +49,22 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
+    - name: Set PYTHONPATH
+      run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
+      
+    - name: Test Python imports
+      run: |
+        python3 -c "
+        try:
+            from actions.adb import ADBController
+            from vision.processor import VisionProcessor
+            from planner.strategy import Planner
+            print('✅ All Python modules imported successfully')
+        except ImportError as e:
+            print(f'❌ Python import error: {e}')
+            exit(1)
+        "
+      
     - name: Run linting
       run: npm run lint
       
@@ -135,6 +151,9 @@ jobs:
     - name: Install backend dependencies
       working-directory: ./backend
       run: npm ci
+      
+    - name: Set PYTHONPATH
+      run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
       
     - name: Run Prettier check
       working-directory: ./backend
