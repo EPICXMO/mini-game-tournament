@@ -109,7 +109,7 @@ jobs:
         customParameters: -sceneList "${{ matrix.scene_path }}"
         
     - name: Upload Unity Build Artifact - ${{ matrix.scene }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: unity-${{ matrix.build_name }}-windows
