@@ -16,7 +16,7 @@ const dbConfig = {
   password: process.env.DB_PASSWORD || 'password',
   max: 20, // Maximum number of connections in the pool
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 2000
 };
 
 // Create connection pool
