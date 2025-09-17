@@ -1,0 +1,98 @@
+name: Build and Deploy WebGL
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'unity/**'
+      - '.github/workflows/webgl-deploy.yml'
+  push:
+    branches: [ master ]
+    paths:
+      - 'unity/**'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      has_artifact: ${{ steps.check_artifact.outputs.has_artifact }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node (for auxiliary scripts if needed)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Determine Unity License Presence
+        id: license
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.UNITY_LICENSE }}" ]; then
+            echo "license=true" >> $GITHUB_OUTPUT
+          else
+            echo "license=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Unity - Editor scripts compile (no build)
+        if: steps.license.outputs.license == 'false'
+        uses: game-ci/unity-builder@v4
+        with:
+          projectPath: unity/MiniGameHub
+          targetPlatform: WebGL
+          buildMethod: UnityBuilderAction.BuildScript.BuildWebGLAll
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL || '' }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD || '' }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL || '' }}
+        continue-on-error: true
+
+      - name: Unity - Build WebGL
+        if: steps.license.outputs.license == 'true'
+        uses: game-ci/unity-builder@v4
+        with:
+          projectPath: unity/MiniGameHub
+          targetPlatform: WebGL
+          buildName: MiniGameHubWebGL
+          buildMethod: UnityBuilderAction.BuildScript.BuildWebGLAll
+          customParameters: -quit -batchmode
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL || '' }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD || '' }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL || '' }}
+
+      - name: Upload artifact for Pages (if exists)
+        if: steps.license.outputs.license == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: unity/MiniGameHub/build/WebGL
+
+      - name: Check artifact existence
+        id: check_artifact
+        shell: bash
+        run: |
+          if [ -d "unity/MiniGameHub/build/WebGL" ]; then
+            echo "has_artifact=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_artifact=false" >> $GITHUB_OUTPUT
+          fi
+
+  deploy:
+    if: needs.build.result == 'success' && github.ref == 'refs/heads/master' && needs.build.outputs.has_artifact == 'true'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+
