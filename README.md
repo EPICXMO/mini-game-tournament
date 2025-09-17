@@ -2,6 +2,8 @@
 
 A cross-platform multiplayer hub featuring 6 classic-inspired mini-games with tournament mode, built with AI assistance and Unity.
 
+📖 **[View Detailed Project Description](PROJECT_DESCRIPTION.md)** - Comprehensive overview of the gaming platform architecture and visual components.
+
 ## 🎮 Vision
 
 **Party Royale** is a hub-and-spoke multiplayer game where friends gather in an interactive lobby and jump into quick arcade-style mini-games. Players can compete in structured tournaments or play casual rounds, with seamless cross-platform multiplayer between PC and mobile devices.
@@ -266,6 +268,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 📞 Support
 
 For questions, issues, or suggestions:
+- **📖 [Project Description](PROJECT_DESCRIPTION.md)** - Detailed visual and architectural overview
 - Check the [roadmap.md](roadmap.md) for development status
 - Review the [CHANGELOG.md](CHANGELOG.md) for recent changes
 - See [AI Development Rules](AI%20Development%20Rules%20%28%60rules.md%60%29.txt) for AI development guidelines
